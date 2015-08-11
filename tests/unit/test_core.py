@@ -279,8 +279,9 @@ def test_fakesock_socket_makefile(old_socket):
     ("fakesock.socket#makefile should set the mode, "
      "bufsize and return its mocked file descriptor")
 
-    # Given a fake socket that has a mocked Entry associated with it
+    # Given a fake HTTP socket that has a mocked Entry associated with it
     socket = fakesock.socket()
+    socket.is_http = True
     socket._entry = Mock()
 
     # When I call makefile()
@@ -295,6 +296,22 @@ def test_fakesock_socket_makefile(old_socket):
 
     # And the entry should have been filled with that filedescriptor
     socket._entry.fill_filekind.assert_called_once_with(fd)
+
+
+@patch('httpretty.core.old_socket')
+def test_fakesock_socket_makefile_not_http(old_socket):
+    ("fakesock.socket#makefile should proxy the call to the true "
+     "socket of a non HTTP socket and return its file object.")
+
+    # Given a non HTTP fake socket
+    socket = fakesock.socket()
+    socket.is_http = False
+
+    # When I call makefile()
+    fd = socket.makefile(mode='rw', bufsize=512)
+
+    # Then it should have called the true socket makefile().
+    socket.truesock.makefile.assert_called_once_with('rw', 512)
 
 
 @patch('httpretty.core.old_socket')

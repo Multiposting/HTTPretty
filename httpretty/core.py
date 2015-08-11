@@ -325,6 +325,11 @@ class fakesock(object):
             descriptor gets filled in with the entry data before being
             returned.
             """
+            if not self.is_http:
+                if not self.truesock:
+                    raise UnmockedError()
+                return self.truesock.makefile(mode, bufsize)
+
             self._mode = mode
             self._bufsize = bufsize
 
